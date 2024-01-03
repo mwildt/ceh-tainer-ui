@@ -1,6 +1,8 @@
 export interface Training {
     id: string,
     challenge: string
+    currentChallengeFailed: boolean
+    currentLevel: number
     stats: Stats
     created: string
     updated: string

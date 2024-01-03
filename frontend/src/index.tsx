@@ -8,6 +8,7 @@ import HistoryItemPage from './history/pages/history-item.page';
 import TrainingsPage from "./training/trainings.page";
 import TrainingStartPage from "./training/training-start.page";
 import TrainingPage from "./training/training.page";
+import QuestionEditPage from "./questions/question-edit.page";
 
 const router = createHashRouter([
   {
@@ -26,9 +27,13 @@ const router = createHashRouter([
         path: "training/:trainingId/history",
         element: <HistoryItemPage/>,
       },{
+        path: "question/:questionId/editor",
+        element: <QuestionEditPage/>,
+      },{
         path: "trainings",
         element: <TrainingsPage/>,
       }]
+
   },
   
 ]);

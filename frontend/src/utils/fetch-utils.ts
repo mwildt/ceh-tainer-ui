@@ -13,6 +13,12 @@ export function patch(ext: any = {}) {
     }
 }
 
+export function header(headers: any) {
+    return {
+        headers: headers
+    }
+}
+
 export function post(ext: any = {}) {
     return {...ext,
         method: "POST"

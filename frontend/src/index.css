@@ -89,7 +89,7 @@ button {
 }
 
 .progress-bar-indicator {
-  height: 10px; background-color: red;
+  height: 10px; background-color: #A52A2A;
 }
 
 .label {
@@ -104,4 +104,20 @@ button {
 
 .training-item {
   margin: 0.5rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.error-container {
+  color: #A52A2A;
+  border: 1px solid #A52A2A;
+  padding: 0.1rem 0.2rem;
 }

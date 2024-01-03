@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { patch, json } from "../utils/fetch-utils";
-import { useNavigate } from "react-router-dom"
+import {Link, useNavigate} from "react-router-dom"
 import { Training } from "./model";
 import { ProgressBar, ProgressStats } from "./progress.widgets";
 
@@ -71,7 +71,7 @@ export default function TrainingPage() {
         return <>
             <h2>Not Found</h2>
             <p>
-                Die gesuchte Training existiert leider nicht oder nicht mehr.
+                Das gesuchte Training existiert leider nicht oder nicht mehr.
                 Möglicherweise wurde sie aufgrund von Inaktivität beendet.
             </p>
             <button className="button" onClick={e => navigate("/")}>Zum Start</button> 
@@ -95,6 +95,9 @@ export default function TrainingPage() {
                 <div className="question">
                     <div className="question-text">{question.text}</div>    
                     <div className="question-options">{question.choices.map(renderOption)}</div>
+                    <div>
+                        <small>level: {training.currentLevel}</small> | <Link to={`/question/${question.id}/editor`}>edit</Link>
+                    </div>
                 </div>
             </div>
      
