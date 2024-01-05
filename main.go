@@ -16,19 +16,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+	router := routing.NewRouter(func(router routing.Routing) {
+
+		router.Handle(
+			routing.Path("/api/**"),
+			httputil.NewSingleHostReverseProxy(serviceLocation))
+
+		router.Handle(
+			routing.Path("/**").Method("GET"),
+			http.FileServer(http.Dir("frontend/build")))
+
+	})
+
 	err = http.ListenAndServe(
 		GetEnvOrDefault("LISTEN_ADDRESS", ":3010"),
-		routing.NewRouter(func(router routing.Routing) {
-
-			router.Handle(
-				routing.Path("/api/**"),
-				httputil.NewSingleHostReverseProxy(serviceLocation))
-
-			router.Handle(
-				routing.Path("/**").Method("GET"),
-				http.FileServer(http.Dir("frontend/build")))
-
-		}))
+		router)
 
 	if err != nil {
 		log.Fatal(err)

@@ -1,0 +1,25 @@
+name: Docker Image CI
+
+env:
+  version: $(date +%s)
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file ceh-trainer-ui.dockerfile --tag registry.ohrenpirat.de:5000/mwildt/ceh-trainer-ui:latest
+    - name: Login Registry
+      run: echo ${{ secrets.DOCKER_REPO_KEY }} | docker login -u github-build --password-stdin registry.ohrenpirat.de:5000
+    - name: Docker Push
+      run: docker push registry.ohrenpirat.de:5000/mwildt/ceh-trainer-ui:latest

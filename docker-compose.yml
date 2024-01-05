@@ -3,7 +3,7 @@ services:
     image: registry.ohrenpirat.de:5000/mwildt/ceh-trainer-ui:latest
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: ceh-trainer-ui.dockerfile
     ports:
       - 3010:3010
     environment:

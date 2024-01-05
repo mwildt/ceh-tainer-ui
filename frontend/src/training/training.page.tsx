@@ -14,6 +14,7 @@ interface Question {
     id: string
     text: string
     choices: Option[]
+    media: string[]
 }
 
 export default function TrainingPage() {
@@ -83,17 +84,29 @@ export default function TrainingPage() {
         return <div>Loading</div>
     }
 
+    function openHistory() {
+        if (training!.stats!.total > 1) {
+            navigate(`/training/${trainingId}/history`)
+        }
+    }
+    function renderMedia(media: string) {
+        return  <div key={media} ><img alt="Ein Bild zu der Frage." src={`/api/media/${media}`} /></div>
+    }
+
     return <div>
                 <div className="progress">
                     <ProgressBar stats={training.stats} />
                 </div>
                 <div className="training-nav">
-                    <div className="button" onClick={e => navigate(`/training/${trainingId}/history`)}>&lt;</div>
+                    <div className="button" onClick={e => openHistory()}>&lt;</div>
                     <div className="button" onClick={e => navigate("/")}>Home</div> 
                     <div><ProgressStats stats={training.stats} /> </div>
                 </div>
                 <div className="question">
-                    <div className="question-text">{question.text}</div>    
+                    <div className="question-text">{question.text}</div>
+
+                    <div className="question-media">{question.media.map(renderMedia)}</div>
+
                     <div className="question-options">{question.choices.map(renderOption)}</div>
                     <div>
                         <small>level: {training.currentLevel}</small> | <Link to={`/question/${question.id}/editor`}>edit</Link>

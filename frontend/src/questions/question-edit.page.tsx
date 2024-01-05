@@ -35,7 +35,7 @@ export default function QuestionEditPage() {
     }, [questionId]);
 
     function save() {
-        fetch(`/api/questions/${questionId}`, patch(json(question, header({'x-api-key': btoa(apiKey!)}))),)
+        fetch(`/api/questions/${questionId}`, patch(json({...question, answerId: selectedChoice}, header({'x-api-key': btoa(apiKey!)}))),)
             .then(response => {
                 if (!response.ok) {
                     setError("Beim Speichern ist leider ein Fehler aufgetretn.")

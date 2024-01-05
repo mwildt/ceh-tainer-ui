@@ -1,6 +1,6 @@
 import  { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import {useNavigate} from "react-router-dom"
+import {Link, useNavigate} from "react-router-dom"
 
 interface Option {
     id: string, 
@@ -102,6 +102,9 @@ export default function HistoryItemPage() {
         <div className="question">
             <div className="question-text">{question.text}</div>    
             <div className="question-options">{question.choices.map(renderOption)}</div>
+        </div>
+        <div>
+            <Link to={`/question/${question.id}/editor`}>edit</Link>
         </div>
     </>
      
