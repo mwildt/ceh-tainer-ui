@@ -20,7 +20,7 @@ interface History {
 
 interface HistoryItem {
     challengeId: string
-    solvingAnswer: string
+    solvingAnswer: string[]
     givenAnswers: string[]
 }
 
@@ -85,7 +85,7 @@ export default function HistoryItemPage() {
     function renderOption(option: Option) {
         let elementClasses = `question-option button`
 
-        if (historyItem!.solvingAnswer === option.id) {
+        if (historyItem!.solvingAnswer.includes(option.id)) {
             elementClasses += " right"
         } else if (historyItem!.givenAnswers.includes(option.id)) {
             elementClasses += " wrong"

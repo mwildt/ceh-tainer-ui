@@ -1,7 +1,6 @@
 import { Stats } from "./model";
 
 function total(stats: Stats) {
-    console.warn('status', stats)
     return stats!.failed + stats!.passed
 }
 

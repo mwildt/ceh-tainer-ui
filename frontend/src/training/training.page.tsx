@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import {useEffect, useReducer, useState} from "react";
 import { useParams } from "react-router";
 import { patch, json } from "../utils/fetch-utils";
 import {Link, useNavigate} from "react-router-dom"
 import { Training } from "./model";
 import { ProgressBar, ProgressStats } from "./progress.widgets";
+import {getSpaceUntilMaxLength} from "@testing-library/user-event/dist/utils";
 
 interface Option {
     id: string, 
@@ -17,6 +18,20 @@ interface Question {
     media: string[]
 }
 
+interface ToggleOptionAction {
+    option: Option
+    submit: boolean
+    reset: boolean
+}
+
+interface SelectionState {
+    options: Option[]
+    submit: boolean
+
+}
+
+const initialSelectionState : SelectionState = {submit: false, options: [] as Option[]}
+
 export default function TrainingPage() {
    
     const {trainingId} = useParams() 
@@ -26,17 +41,17 @@ export default function TrainingPage() {
     const [training, setTraining] = useState<Training|undefined>(undefined);
     const [question, setQuestion] = useState<Question|undefined>(undefined);
     const [wrongAnswers, setWrongAnswers] = useState<Option[]>([]);
-    const [selectedChoice, setSelectedChoice] = useState<Option[]>([]);
+    const [selectionState, setSelectionState] = useState<SelectionState>(initialSelectionState);
+
 
     useEffect(() => {
         fetch(`/api/trainings/${trainingId}`)
             .then(r => {
-                console.warn(r)
                 setStatus(r.status)
                 return r.json()
             }).then(setTraining)
     }, [trainingId]);
-     
+
     useEffect(() => {
         if (training) {
             fetch(`/api/questions/${training.challenge}`)
@@ -44,53 +59,46 @@ export default function TrainingPage() {
                 .then(setQuestion)
         }        
         setWrongAnswers([])
-        setSelectedChoice([])
     }, [training]);
 
-    // useEffect(() => {
-    //     if (selectedChoice && training) {
-    //         fetch(`/api/trainings/${training!.id}`, patch(json({answer: selectedChoice[0]})))
-    //             .then(r => r.json())
-    //             .then(r => {
-    //                 setSelectedChoice([])
-    //                 if (r.success){
-    //                      setTraining(r)
-    //                 } else {
-    //                     setWrongAnswers(wrongAnswers.concat(selectedChoice))
-    //                 }
-    //             });
-    //     }
-    // }, [selectedChoice, training]);
+    useEffect(() => {
+       console.warn(selectionState)
+       if (selectionState.submit) {
+           fetch(`/api/trainings/${training!.id}`, patch(json({answer: selectionState.options.map(c => c.id)})))
+               .then(r => r.json())
+               .then(r => {
+                   setSelectionState(initialSelectionState)
+                   if (r.success){
+                       setTraining(r)
+                   } else {
+                       setWrongAnswers(wrongAnswers.concat(selectionState.options))
+                   }
+               });
+       }
+    }, [selectionState]);
 
-    function submit() {
-        fetch(`/api/trainings/${training!.id}`, patch(json({answer: selectedChoice[0]})))
-            .then(r => r.json())
-            .then(r => {
-                setSelectedChoice([])
-                if (r.success){
-                     setTraining(r)
-                } else {
-                    setWrongAnswers(wrongAnswers.concat(selectedChoice))
-                }
-            });
-    }
 
     function toggleOption(option :Option , execSubmit: boolean) {
-        if (selectedChoice.includes(option)) {
-            setSelectedChoice(selectedChoice.filter(opt => opt !== option))
-        } else {
-            setSelectedChoice(selectedChoice.concat(option))
-        }
-        if (execSubmit) {
-            submit()
-        }
+        setSelectionState({
+            options: selectionState.options.includes(option)
+                ? selectionState.options.filter(opt => opt !== option)
+                : selectionState.options.concat(option)
+            ,
+            submit: execSubmit
+        })
     }
-    
+
+    function runValidation() {
+        setSelectionState(Object.assign({} as SelectionState, selectionState, {
+            submit: true
+        }))
+    }
+
     function renderOption(option: Option) {
-        const elementClasses = `question-option button${wrongAnswers.includes(option) ? " wrong": ""}${(selectedChoice.includes(option))?" logged":""}`
+        const elementClasses = `question-option button${wrongAnswers.includes(option) ? " wrong": ""}${(selectionState.options.includes(option))?" logged":""}`
         return <div key={option.id} className={elementClasses}>
             <div className="option-text" onClick={e => toggleOption(option, true)} >{option.text}</div>
-            <span className="option-check" onClick={e => toggleOption(option, false)}>[{selectedChoice.includes(option) ? 'x' : '_'}]</span>
+            <span className="option-check" onClick={e => toggleOption(option, false)}>[{selectionState.options.includes(option) ? 'x' : '_'}]</span>
         </div>
     }
 
@@ -139,9 +147,9 @@ export default function TrainingPage() {
 
                         {question.choices.map(renderOption)}
 
-                        {selectedChoice.length > 0 ?
+                        {selectionState.options.length > 0 ?
                             <div className="margin-top-extend question-option button">
-                                <div className="option-text" onClick={e => submit()} >validate selected answer</div>
+                                <div className="option-text" onClick={e => runValidation()} >validate selected answer</div>
                             </div> : ''}
                     </div>
 
