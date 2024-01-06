@@ -35,6 +35,19 @@ main {
   padding: 10px;
   margin: 10px 0px;
   border: 1px solid #505050;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.option-text {}
+
+.margin-top-extend {
+  margin-top: 2em !important;
+}
+
+.option-check{
+  margin-left: auto;
 }
 
 .button {

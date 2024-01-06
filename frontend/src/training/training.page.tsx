@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import {useEffect, useReducer, useState} from "react";
 import { useParams } from "react-router";
 import { patch, json } from "../utils/fetch-utils";
 import {Link, useNavigate} from "react-router-dom"
 import { Training } from "./model";
 import { ProgressBar, ProgressStats } from "./progress.widgets";
+import {getSpaceUntilMaxLength} from "@testing-library/user-event/dist/utils";
 
 interface Option {
     id: string, 
@@ -17,6 +18,20 @@ interface Question {
     media: string[]
 }
 
+interface ToggleOptionAction {
+    option: Option
+    submit: boolean
+    reset: boolean
+}
+
+interface SelectionState {
+    options: Option[]
+    submit: boolean
+
+}
+
+const initialSelectionState : SelectionState = {submit: false, options: [] as Option[]}
+
 export default function TrainingPage() {
    
     const {trainingId} = useParams() 
@@ -26,7 +41,8 @@ export default function TrainingPage() {
     const [training, setTraining] = useState<Training|undefined>(undefined);
     const [question, setQuestion] = useState<Question|undefined>(undefined);
     const [wrongAnswers, setWrongAnswers] = useState<Option[]>([]);
-    const [selectedChoice, setSelectedChoice] = useState<Option|undefined>(undefined);
+    const [selectionState, setSelectionState] = useState<SelectionState>(initialSelectionState);
+
 
     useEffect(() => {
         fetch(`/api/trainings/${trainingId}`)
@@ -35,7 +51,7 @@ export default function TrainingPage() {
                 return r.json()
             }).then(setTraining)
     }, [trainingId]);
-     
+
     useEffect(() => {
         if (training) {
             fetch(`/api/questions/${training.challenge}`)
@@ -43,27 +59,47 @@ export default function TrainingPage() {
                 .then(setQuestion)
         }        
         setWrongAnswers([])
-        setSelectedChoice(undefined)
     }, [training]);
 
     useEffect(() => {
-        if (selectedChoice) {
-            fetch(`/api/trainings/${training!.id}`, patch(json({answer: selectedChoice.id})))
-                .then(r => r.json())
-                .then(r => {
-                    setSelectedChoice(undefined)
-                    if (r.success){
-                         setTraining(r)
-                    } else {
-                        setWrongAnswers(wrongAnswers.concat(selectedChoice))
-                    }
-                });    
-        }
-    }, [selectedChoice, training]);
-    
+       console.warn(selectionState)
+       if (selectionState.submit) {
+           fetch(`/api/trainings/${training!.id}`, patch(json({answer: selectionState.options.map(c => c.id)})))
+               .then(r => r.json())
+               .then(r => {
+                   setSelectionState(initialSelectionState)
+                   if (r.success){
+                       setTraining(r)
+                   } else {
+                       setWrongAnswers(wrongAnswers.concat(selectionState.options))
+                   }
+               });
+       }
+    }, [selectionState]);
+
+
+    function toggleOption(option :Option , execSubmit: boolean) {
+        setSelectionState({
+            options: selectionState.options.includes(option)
+                ? selectionState.options.filter(opt => opt !== option)
+                : selectionState.options.concat(option)
+            ,
+            submit: execSubmit
+        })
+    }
+
+    function runValidation() {
+        setSelectionState(Object.assign({} as SelectionState, selectionState, {
+            submit: true
+        }))
+    }
+
     function renderOption(option: Option) {
-        const elementClasses = `question-option button${wrongAnswers.includes(option) ? " wrong": ""}${(selectedChoice === option)?" logged":""}`
-        return <div key={option.id} className={elementClasses} onClick={e => setSelectedChoice(option)}>{option.text}</div>
+        const elementClasses = `question-option button${wrongAnswers.includes(option) ? " wrong": ""}${(selectionState.options.includes(option))?" logged":""}`
+        return <div key={option.id} className={elementClasses}>
+            <div className="option-text" onClick={e => toggleOption(option, true)} >{option.text}</div>
+            <span className="option-check" onClick={e => toggleOption(option, false)}>[{selectionState.options.includes(option) ? 'x' : '_'}]</span>
+        </div>
     }
 
     if (status === 0) {
@@ -107,10 +143,23 @@ export default function TrainingPage() {
 
                     <div className="question-media">{question.media.map(renderMedia)}</div>
 
-                    <div className="question-options">{question.choices.map(renderOption)}</div>
+                    <div className="question-options">
+
+                        {question.choices.map(renderOption)}
+
+                        {selectionState.options.length > 0 ?
+                            <div className="margin-top-extend question-option button">
+                                <div className="option-text" onClick={e => runValidation()} >validate selected answer</div>
+                            </div> : ''}
+                    </div>
+
+
+
                     <div>
                         <small>level: {training.currentLevel}</small> | <Link to={`/question/${question.id}/editor`}>edit</Link>
                     </div>
+
+
                 </div>
             </div>
      

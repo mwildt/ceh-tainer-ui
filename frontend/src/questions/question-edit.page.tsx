@@ -21,7 +21,7 @@ export default function QuestionEditPage() {
 
     const [status, setStatus] = useState<number>(0);
     const [question, setQuestion] = useState<Question|undefined>(undefined);
-    const [selectedChoice, setSelectedChoice] = useState<string|undefined>(undefined);
+    const [selectedChoice, setSelectedChoice] = useState<string[]>([]);
     const [apiKey, setApiKey] = useState<string|undefined>(undefined);
     const [lock, setLock] = useState<boolean>(false);
     const [error, setError] = useState<string|undefined>(undefined);
@@ -35,7 +35,7 @@ export default function QuestionEditPage() {
     }, [questionId]);
 
     function save() {
-        fetch(`/api/questions/${questionId}`, patch(json({...question, answerId: selectedChoice}, header({'x-api-key': btoa(apiKey!)}))),)
+        fetch(`/api/questions/${questionId}`, patch(json({...question, answer: selectedChoice}, header({'x-api-key': btoa(apiKey!)}))),)
             .then(response => {
                 if (!response.ok) {
                     setError("Beim Speichern ist leider ein Fehler aufgetretn.")
@@ -85,13 +85,15 @@ export default function QuestionEditPage() {
     }
 
     function renderSelectOption(option: Option) {
-        const elementClasses = `question-option ${lock ? "" : "button"} ${(selectedChoice === option.id)?" logged":""}`
-        return <div key={option.id} className={elementClasses} onClick={e => updateChoice(option.id)}>{option.text}</div>
+        const elementClasses = `question-option ${lock ? "" : "button"} ${(selectedChoice.includes(option.id))?" logged":""}`
+        return <div key={option.id} className={elementClasses} onClick={e => toggleChoice(option.id)}>{option.text}</div>
     }
 
-    function updateChoice(value : string|undefined) {
+    function toggleChoice(value : string) {
         if (!lock) {
-            setSelectedChoice(value)
+            setSelectedChoice(selectedChoice.includes(value)
+                ? selectedChoice.filter(i => i !== value)
+                : selectedChoice.concat(value))
         }
     }
 
@@ -121,7 +123,7 @@ export default function QuestionEditPage() {
                         {question.choices.map(renderSelectOption)}
                         {lock ? '' : <>
                             Sicher? Oder die richtige Antwort so lassen wie bisher?
-                            <div className={ `question-option ${lock ? "" : "button"} ${(!selectedChoice)?" logged":""}`} onClick={e => updateChoice(undefined)}>DO NOT UPDATE</div>
+                            <div className={ `question-option ${lock ? "" : "button"} ${(!selectedChoice)?" logged":""}`} onClick={e => setSelectedChoice([])}>DO NOT UPDATE</div>
                         </>}
                     </div>
 
