@@ -1,4 +1,4 @@
-import { Stats } from "./model";
+import {ChallengeStats, Stats} from "./model";
 
 function total(stats: Stats) {
     return stats!.failed + stats!.passed
@@ -24,6 +24,10 @@ export function ProgressPercentage(props: {stats: Stats}) {
 export function ProgressStats(props: {stats: Stats}) {
     const t = total(props.stats);
     return <>{props.stats!.passed}/{t} (<ProgressPercentage stats={props.stats}></ProgressPercentage>)</>
+}
+
+export function ProgressChallengeStats(props: {stats: ChallengeStats}) {
+    return <>{props.stats!.initial}/{props.stats!.proceeding}/{props.stats!.done} [{props.stats!.total}]</>
 }
 
 

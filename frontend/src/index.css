@@ -40,6 +40,14 @@ main {
   align-items: center;
 }
 
+.footer {
+  display: flex;
+  justify-content: space-between;
+}
+.training-footer {}
+.challenge-footer {}
+
+
 .option-text {}
 
 .margin-top-extend {

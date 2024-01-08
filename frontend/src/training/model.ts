@@ -3,7 +3,9 @@ export interface Training {
     challenge: string
     currentChallengeFailed: boolean
     currentLevel: number
+    currentCount: number
     stats: Stats
+    challengeStats: ChallengeStats
     created: string
     updated: string
 }
@@ -13,4 +15,11 @@ export interface Stats {
     passed: number
     failed: number
     currentAttempts: number
+}
+
+export interface ChallengeStats {
+    total: number
+    initial: number
+    proceeding: number
+    done: number
 }

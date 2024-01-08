@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import { patch, json } from "../utils/fetch-utils";
 import {Link, useNavigate} from "react-router-dom"
 import { Training } from "./model";
-import { ProgressBar, ProgressStats } from "./progress.widgets";
+import {ProgressBar, ProgressChallengeStats, ProgressPercentage, ProgressStats} from "./progress.widgets";
 import {getSpaceUntilMaxLength} from "@testing-library/user-event/dist/utils";
 
 interface Option {
@@ -136,7 +136,7 @@ export default function TrainingPage() {
                 <div className="training-nav">
                     <div className="button" onClick={e => openHistory()}>&lt;</div>
                     <div className="button" onClick={e => navigate("/")}>Home</div> 
-                    <div><ProgressStats stats={training.stats} /> </div>
+                    <div><ProgressChallengeStats stats={training.challengeStats} /> </div>
                 </div>
                 <div className="question">
                     <div className="question-text">{question.text}</div>
@@ -153,10 +153,13 @@ export default function TrainingPage() {
                             </div> : ''}
                     </div>
 
-
-
-                    <div>
-                        <small>level: {training.currentLevel}</small> | <Link to={`/question/${question.id}/editor`}>edit</Link>
+                    <div className="footer">
+                        <div className="challenge-footer">
+                            <small>level: {training.currentLevel}, count: {training.currentCount}</small> | <Link to={`/question/${question.id}/editor`}>edit</Link>
+                        </div>
+                        <div className="training">
+                            <small><ProgressPercentage stats={training.stats} /></small>
+                        </div>
                     </div>
 
 
